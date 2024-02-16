@@ -70,9 +70,11 @@ userSchema.methods.generateAccessToken = function () {
       username: this.username,
       fullname: this.fullname,
     },
-    process.env.ACCESS_TOKEN_SECRET,
+    // process.env.ACCESS_TOKEN_SECRET,
+    "39974f00cbbaaf79012a8cf85042e89d242e486cd454fed2225319e1cd4b204d",
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      // expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: "1d",
     }
   );
 };
@@ -82,9 +84,11 @@ userSchema.methods.generateRefreshToken = function () {
     {
       _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET,
+    // process.env.REFRESH_TOKEN_SECRET,
+    "hetpatel123",
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      // expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: "10d",
     }
   );
 };
