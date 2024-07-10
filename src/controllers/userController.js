@@ -39,6 +39,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const { username, fullname, email, password } = req.body;
 
     if (
+      // it's a different format for checking if(one of the data) is there or not.
       [username, fullname, email, password].some(
         (field) => field?.trim() === ""
       )
