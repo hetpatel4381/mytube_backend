@@ -1,6 +1,6 @@
-import asyncHandler from "../utils/asyncHandler";
-import { ApiResponse } from "../utils/ApiResponse";
-import ApiError from "../utils/ApiError";
+import asyncHandler from "../utils/asyncHandler.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import ApiError from "../utils/ApiError.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
   //TODO: get all comments for a video
