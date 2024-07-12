@@ -13,7 +13,7 @@ import {
   updateUserCoverImage,
 } from "../controllers/userController.js";
 import { upload } from "../middlewares/multer.js";
-import { verityJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const userRoutes = Router();
 
@@ -34,21 +34,21 @@ userRoutes.route("/register").post(
 userRoutes.route("/login").post(loginUser);
 
 // secured route
-userRoutes.route("/logout").post(verityJWT, logoutUser);
+userRoutes.route("/logout").post(verifyJWT, logoutUser);
 userRoutes.route("/refresh-token").post(refreshAccessToken);
 
-userRoutes.route("/change-password").post(verityJWT, changeCurrentPassword);
-userRoutes.route("/current-user").get(verityJWT, getCurrentUser);
-userRoutes.route("/update-account").patch(verityJWT, updateAccountDetails);
+userRoutes.route("/change-password").post(verifyJWT, changeCurrentPassword);
+userRoutes.route("/current-user").get(verifyJWT, getCurrentUser);
+userRoutes.route("/update-account").patch(verifyJWT, updateAccountDetails);
 
 userRoutes
   .route("/avatar")
-  .patch(verityJWT, upload.single("avatar"), updateUserAvatar);
+  .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
 userRoutes
   .route("/cover-image")
-  .patch(verityJWT, upload.single("coverImage"), updateUserCoverImage);
+  .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
-userRoutes.route("/c/:username").get(verityJWT, getUserChannelProfile);
-userRoutes.route("/history").get(verityJWT, getWatchHistory);
+userRoutes.route("/c/:username").get(verifyJWT, getUserChannelProfile);
+userRoutes.route("/history").get(verifyJWT, getWatchHistory);
 
 export default userRoutes;
