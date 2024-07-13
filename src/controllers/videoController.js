@@ -128,7 +128,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     const thumbnail = req.file.path;
 
     // validate the video-ID.
-    if (!videoId || !title || !description || !thumbnail) {
+    if (!title || !description || !thumbnail) {
       throw new ApiError(400, "All Fields are Required!");
     }
 
@@ -163,8 +163,31 @@ const updateVideo = asyncHandler(async (req, res) => {
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
-  const { videoId } = req.params;
-  //TODO: delete video
+  try {
+    // delete video.
+
+    // get video-ID by req.params.
+    const { videoId } = req.params;
+
+    // Check if the video exists before attempting to delete it.
+    const video = await Video.findById(videoId);
+
+    // Handle case where video is not found
+    if (!video) {
+      throw new ApiError(404, "Video not found");
+    }
+
+    // find by ID and delete the video from DB.
+    const deleteVideo = await Video.findByIdAndDelete(videoId);
+
+    // return the response.
+    return res
+      .status(200)
+      .json(new ApiResponse(200, deleteVideo, "Video Deleted Successfully!"));
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(400, "Error encountered Deleting a Video!");
+  }
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
