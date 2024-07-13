@@ -1,6 +1,8 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { Video } from "../models/videoModel.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
@@ -8,8 +10,45 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
-  // TODO: get video, upload to cloudinary, create video
+  try {
+    // get video, upload to cloudinary, create video.
+
+    // Get title, description, video, thumbnail from req.body.
+    const { title, description } = req.body;
+    console.log("this is req.body", req.body);
+    const videoFile = req.files?.videoFile[0]?.path;
+    const thumbnail = req.files?.thumbnail[0]?.path;
+
+    // validate the required fields.
+    if (!title || !description || !videoFile || !thumbnail) {
+      throw new ApiError(400, "All fields are required!");
+    }
+
+    // upload video to cloudinary.
+    const video = await uploadOnCloudinary(videoFile);
+    // upload thumbnail to cloudinary.
+    const thumbnailUpload = await uploadOnCloudinary(thumbnail);
+
+    // create new-video to store in DB.
+    const newVideo = await Video.create({
+      title,
+      description,
+      videoFile: video.url,
+      thumbnail: thumbnailUpload.url,
+      duration: video.duration,
+      views: 0,
+      isPublished: true,
+      owner: req.user._id,
+    });
+
+    // return the response.
+    return res
+      .status(201)
+      .json(new ApiResponse(201, newVideo, "Video Published Successfully!"));
+  } catch (error) {
+    console.error(error);
+    throw new ApiError(500, "Error publishing video");
+  }
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
