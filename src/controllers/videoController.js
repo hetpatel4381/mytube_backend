@@ -59,7 +59,6 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     // Get title, description, video, thumbnail from req.body.
     const { title, description } = req.body;
-    console.log("this is req.body", req.body);
     const videoFile = req.files?.videoFile[0]?.path;
     const thumbnail = req.files?.thumbnail[0]?.path;
 
@@ -120,8 +119,47 @@ const getVideoById = asyncHandler(async (req, res) => {
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
-  const { videoId } = req.params;
-  //TODO: update video details like title, description, thumbnail
+  try {
+    // update video details like title, description, thumbnail.
+
+    // get video-ID from req.params.
+    const { videoId } = req.params;
+    const { title, description } = req.body;
+    const thumbnail = req.file.path;
+
+    // validate the video-ID.
+    if (!videoId || !title || !description || !thumbnail) {
+      throw new ApiError(400, "All Fields are Required!");
+    }
+
+    // uploading thumbnail to cloudinary.
+    const thumbnailUpload = await uploadOnCloudinary(thumbnail);
+
+    // if url not generated then showing error.
+    if (!thumbnailUpload.url) {
+      throw new ApiError(400, "Error while uploading thumbnail");
+    }
+
+    // updating the video with the req.body content to the DB.
+    const video = await Video.findByIdAndUpdate(
+      videoId,
+      {
+        $set: {
+          title: title,
+          description: description,
+          thumbnail: thumbnailUpload.url,
+        },
+      },
+      { new: true }
+    );
+
+    // return the response.
+    return res
+      .status(200)
+      .json(new ApiResponse(200, video, "Video Updated Successfully!"));
+  } catch (error) {
+    throw new ApiError(400, "Error Encountered Updating Video!");
+  }
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
