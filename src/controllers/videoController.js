@@ -185,7 +185,6 @@ const deleteVideo = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, deleteVideo, "Video Deleted Successfully!"));
   } catch (error) {
-    console.log(error);
     throw new ApiError(400, "Error encountered Deleting a Video!");
   }
 });
@@ -225,7 +224,6 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    console.log(error);
     throw new ApiError(400, "Error Encountered updating publish status!");
   }
 });
