@@ -40,7 +40,31 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 });
 
 // controller to return subscriber list of a channel
-const getUserChannelSubscribers = asyncHandler(async (req, res) => {});
+const getUserChannelSubscribers = asyncHandler(async (req, res) => {
+  try {
+    const { subscriberId } = req.params;
+
+    // Find all subscriptions for the subscriber
+    const subscriptions = await Subscription.find({
+      subscriber: subscriberId,
+    }).populate("channel", "name email");
+
+    // Extract the channels from the subscriptions
+    const channels = subscriptions.map((sub) => sub.channel);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          channels,
+          "Subscribed channels fetched successfully!"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(400, "Error Encountered Fetching channel subscribers!");
+  }
+});
 
 // controller to return channel list to which user has subscribed
 const getSubscribedChannels = asyncHandler(async (req, res) => {
@@ -57,7 +81,6 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     const subscriptions = await Subscription.find({
       channel: channelId,
     }).populate("subscriber", "name email");
-
     if (!subscriptions) {
       throw new ApiError(400, "Subscriptions Not Found!");
     }
@@ -71,10 +94,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         new ApiResponse(200, subscribers, "Subscribers fetched successfully!")
       );
   } catch (error) {
-    throw new ApiError(
-      400,
-      "Error Encountered Getting User Channel Subscribers!"
-    );
+    throw new ApiError(400, "Error Encountered Getting Subscribers Channels!");
   }
 });
 
