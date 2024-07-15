@@ -2,6 +2,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import { Like } from "../models/likeModel.js";
+import { Comment } from "../models/commentModel.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
   try {
@@ -22,7 +23,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
     if (existingLike) {
       // If the like exists, remove it.
-      await existingLike.deleteOne();
+      await existingLike.deleteOne({ likedBy: userId });
       return res
         .status(200)
         .json(new ApiResponse(200), null, "Video Like Removed Successfully!");
@@ -34,14 +35,40 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         .json(new ApiResponse(201, null, "Video Liked Successfully!"));
     }
   } catch (error) {
-    console.log(error);
     throw new ApiError(400, "Error Encountered Toggling Video Like!");
   }
 });
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
+  // Toggle like on Comment.
+
+  // Get comment-ID from req.params and validate it.
   const { commentId } = req.params;
-  //TODO: toggle like on comment
+  const userId = req.user._id;
+
+  // Check if the user already liked the comment
+  const existingLike = await Like.findOne({
+    comment: commentId,
+    likedBy: userId,
+  });
+
+  if (existingLike) {
+    // If the like exists, remove it
+    await existingLike.deleteOne();
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "Comment like removed successfully!"));
+  } else {
+    // If the like doesn't exist, create it
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      throw new ApiError(404, "Comment not found");
+    }
+    await Like.create({ comment: commentId, likedBy: userId });
+    return res
+      .status(201)
+      .json(new ApiResponse(201, null, "Comment liked successfully!"));
+  }
 });
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
