@@ -120,7 +120,7 @@ const updateComment = asyncHandler(async (req, res) => {
     return res
       .status(200)
       .json(
-        new ApiResponse(200, updateComment, "Comment updated Successfully!")
+        new ApiResponse(200, updatedComment, "Comment updated Successfully!")
       );
   } catch (error) {
     throw new ApiError(400, "Error Encountered Updating Video Comment");
@@ -128,7 +128,40 @@ const updateComment = asyncHandler(async (req, res) => {
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
-  // TODO: delete a comment
+  try {
+    // delete a comment.
+
+    // Get comment-ID from req.params.
+    const { commentId } = req.params;
+
+    // validate comment-ID.
+    if (!commentId) {
+      throw new ApiError(400, "Comment-ID Required!");
+    }
+
+    // if Comment is not found, return an error response.
+    const comment = await Comment.findById(commentId);
+
+    // validate the comment.
+    if (!comment) {
+      return res
+        .status(400)
+        .json(new ApiResponse(400, null, "Comment not Found!"));
+    }
+
+    // Delete the comment form DB.
+    const deletedComment = await Comment.findByIdAndDelete(commentId);
+
+    // return response.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, deletedComment, "Comment Deleted Successfully!")
+      );
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(400, "Error Encounterd Deleting an Comment!");
+  }
 });
 
 export { getVideoComments, addComment, updateComment, deleteComment };
