@@ -95,7 +95,36 @@ const addComment = asyncHandler(async (req, res) => {
 });
 
 const updateComment = asyncHandler(async (req, res) => {
-  // TODO: update a comment
+  try {
+    // update a comment.
+
+    // Get comment-ID from req.params.
+    const { commentId } = req.params;
+
+    // Get content from req.body.
+    const { content } = req.body;
+
+    // validate the comment-ID.
+    if (!commentId) {
+      throw new ApiError(400, "Comment-ID Required!");
+    }
+
+    // updating the comment content in DB.
+    const updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      { content },
+      { new: true }
+    );
+
+    // return updated comment response.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updateComment, "Comment updated Successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(400, "Error Encountered Updating Video Comment");
+  }
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
