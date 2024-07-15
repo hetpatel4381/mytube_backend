@@ -3,11 +3,56 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import { Video } from "../models/videoModel.js";
 import { Comment } from "../models/commentModel.js";
+import mongoose from "mongoose";
 
 const getVideoComments = asyncHandler(async (req, res) => {
-  //TODO: get all comments for a video
-  const { videoId } = req.params;
-  const { page = 1, limit = 10 } = req.query;
+  try {
+    // get all comments for a video.
+
+    // getting video-ID from req.params.
+    const { videoId } = req.params;
+
+    // getting page and limit from req.query.
+    const { page = 1, limit = 10 } = req.query;
+
+    // validating video-ID.
+    if (!videoId) {
+      throw new ApiError(400, "Video-ID Required!");
+    }
+
+    // searching for video in DB.
+    const videoExists = await Video.findById(videoId);
+
+    // validating the video.
+    if (!videoExists) {
+      throw new ApiError(400, "Video not Found!");
+    }
+
+    // set pagination options.
+    const options = {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      sort: { createdAt: -1 },
+    };
+
+    // Get comments using aggregation and pagination.
+    const comments = await Comment.aggregatePaginate(
+      Comment.aggregate().match({
+        video: new mongoose.Types.ObjectId(videoId),
+      }),
+      options
+    );
+
+    // return the response with comments.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, comments, "Video Comments Fetched Successfully!")
+      );
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(400, "Error Encountered getting Comments of Video!");
+  }
 });
 
 const addComment = asyncHandler(async (req, res) => {
