@@ -10,6 +10,7 @@ import {
 const commentRouter = Router();
 
 // commentRouter.use() // Applying verifyJWT middlewate to all routes in this file.
+commentRouter.use(verifyJWT);
 
 commentRouter.route("/:videoId").get(getVideoComments).post(addComment);
 commentRouter.route("/c/:commentId").delete(deleteComment).patch(updateComment);
