@@ -39,7 +39,6 @@ const createPlaylist = asyncHandler(async (req, res) => {
         new ApiResponse(201, createPlaylist, "Playlist created successfully!")
       );
   } catch (error) {
-    console.error(error);
     throw new ApiError(500, "Error encountered while creating playlist!");
   }
 });
@@ -74,7 +73,6 @@ const getPlaylistById = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, playlist, "Playlist Fetched Successfully!"));
   } catch (error) {
-    console.log(error);
     throw new ApiError(400, "Error Encountered while fetching Playlist!");
   }
 });
@@ -94,9 +92,34 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 });
 
 const updatePlaylist = asyncHandler(async (req, res) => {
-  const { playlistId } = req.params;
-  const { name, description } = req.body;
-  //TODO: update playlist
+  try {
+    // update playlist.
+
+    // Get playlist-ID from req.params and (name, desctription from req.body).
+    const { playlistId } = req.params;
+    const { name, description } = req.body;
+
+    // validate playlist-ID, name and desctiption.
+    if (!playlistId || !name || !description) {
+      throw new ApiError(400, "All Fields are Required!");
+    }
+
+    // fetch and update playlist in DB.
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(
+      playlistId,
+      { name, description },
+      { new: true }
+    );
+
+    // return response.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, updatedPlaylist, "Playlist Updated Successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(400, "Error Encounterd while updating the Playlist!");
+  }
 });
 
 export {
