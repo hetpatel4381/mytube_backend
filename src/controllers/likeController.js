@@ -72,8 +72,33 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
 });
 
 const toggleTweetLike = asyncHandler(async (req, res) => {
-  const { tweetId } = req.params;
-  //TODO: toggle like on tweet
+  try {
+    // toggle like on tweet.
+
+    // Get tweet-ID from req.params and validate it.
+    const { tweetId } = req.params;
+    const userId = req.user._id;
+
+    // Check if the user already liked the tweet
+    const existingLike = await Like.findOne({
+      tweet: tweetId,
+      likedBy: userId,
+    });
+
+    if (existingLike) {
+      // If the like exists, remove it
+      await existingLike.deleteOne();
+      return res
+        .status(200)
+        .json(new ApiResponse(200, null, "Tweet like removed successfully!"));
+    } else {
+      // If the like doesn't exist, create it
+      await Like.create({ tweet: tweetId, likedBy: userId });
+      return res
+        .status(201)
+        .json(new ApiResponse(201, null, "Tweet liked successfully!"));
+    }
+  } catch (error) {}
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
