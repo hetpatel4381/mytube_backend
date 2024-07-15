@@ -7,7 +7,7 @@ MyTube - Backend
 Here is the complete `README.md` file for your project:
 
 ````markdown
-# Chai_And_Code API
+# MyTube_backend API
 
 This project provides a set of APIs for managing videos, playlists, likes, subscriptions, and user-related actions in the Chai_And_Code application.
 
