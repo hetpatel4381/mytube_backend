@@ -10,7 +10,27 @@ const getChannelStats = asyncHandler(async (req, res) => {
 });
 
 const getChannelVideos = asyncHandler(async (req, res) => {
-  // TODO: Get all the videos uploaded by the channel
+  try {
+    // Get all the videos uploaded by the channel
+
+    // Get user-ID from req.user._id.
+    const userId = req.user._id;
+
+    // Get all videos by the channel.
+    const videos = await Video.find({ owner: userId });
+
+    // return response.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, videos, "Channel Videos Fetched Successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(
+      400,
+      "Error Encoutered Fetching All Videos of the Channel!"
+    );
+  }
 });
 
 export { getChannelStats, getChannelVideos };
