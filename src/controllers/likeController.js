@@ -102,7 +102,29 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  //TODO: get all liked videos
+  try {
+    // get all liked videos.
+
+    // get user-Id from req.user._id.
+    const userId = req.user._id;
+
+    // Get all likes by the user for videos
+    const likes = await Like.find({
+      likedBy: userId,
+      video: { $exists: true },
+    }).populate("video");
+
+    // Extract the videos from the likes
+    const likedVideos = likes.map((like) => like.video);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, likedVideos, "Liked videos fetched successfully!")
+      );
+  } catch (error) {
+    throw new ApiError(400, "Error Encountered While Toggling Tweet Like!");
+  }
 });
 
 export { toggleCommentLike, toggleTweetLike, toggleVideoLike, getLikedVideos };
