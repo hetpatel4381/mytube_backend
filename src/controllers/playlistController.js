@@ -117,8 +117,50 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 });
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
-  const { playlistId, videoId } = req.params;
-  // TODO: remove video from playlist
+  try {
+    // remove video from playlist.
+
+    // Get playlist-ID and video-ID from req.params and validate the playlist-ID and video-ID.
+    const { playlistId, videoId } = req.params;
+    if (!playlistId || !videoId) {
+      throw new ApiError(400, "Playlist-ID and Video-ID Required!");
+    }
+
+    // Find the playlist by playlist-ID from DB and validate if playlist exist or not.
+    const playlist = await Playlist.findById(playlistId);
+    if (!playlist) {
+      throw new ApiError(400, "Playlist Not Found!");
+    }
+
+    // check if video exist in the playlist or not.
+    const videoIndex = playlist.videos.indexOf(videoId);
+    if (videoIndex === -1) {
+      throw new ApiError(400, "Video Not Found!");
+    }
+
+    // remove video from the playlist.
+    playlist.videos.splice(videoIndex, 1);
+
+    // save the updated playlist.
+    await playlist.save();
+
+    // return the updated playlist.
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          playlist,
+          "Video Removed from the Playlist Successfully!"
+        )
+      );
+  } catch (error) {
+    console.log(error);
+    throw new ApiError(
+      400,
+      "Error Encountered Removing the Video from the Playlist!"
+    );
+  }
 });
 
 const deletePlaylist = asyncHandler(async (req, res) => {
